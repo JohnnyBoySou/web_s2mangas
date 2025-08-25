@@ -19,16 +19,16 @@ jobs:
       - name: Checkout do código
         uses: actions/checkout@v4
         
+      - name: Instalar pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: latest
+          
       - name: Configurar Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
-          
-      - name: Instalar pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: latest
           
       - name: Instalar dependências
         run: pnpm install --frozen-lockfile
@@ -67,16 +67,16 @@ jobs:
       - name: Checkout do código
         uses: actions/checkout@v4
         
+      - name: Instalar pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: latest
+          
       - name: Configurar Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
-          
-      - name: Instalar pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: latest
           
       - name: Instalar dependências
         run: pnpm install --frozen-lockfile
