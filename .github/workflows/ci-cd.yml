@@ -46,12 +46,6 @@ jobs:
       - name: Build do projeto
         run: pnpm run build
         
-      - name: Upload artifacts do build
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-files
-          path: build/
-          retention-days: 1
 
   # Job de CD (Continuous Deployment) - apenas para main
   deploy:
@@ -83,18 +77,7 @@ jobs:
         
       - name: Build do projeto
         run: pnpm run build
-        
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
-        
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: build
           
-      - name: Deploy para GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
 
   # Job de notificação
   notify:
