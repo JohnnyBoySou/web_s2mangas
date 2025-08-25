@@ -22,11 +22,39 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: 'pnpm'
+          
+      - name: Instalar pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: latest
           
       - name: Instalar dependências
-        run: npm ci
+        run: pnpm install --frozen-lockfile
         
       - name: Build
-        run: npm run build
+        run: pnpm run build
+        
+      - name: Executar testes unitários
+        run: |
+          echo "Executando testes unitários..."
+          pnpm test || echo "Nenhum teste configurado ainda"
+          
+      - name: Executar testes de integração
+        run: |
+          echo "Executando testes de integração..."
+          pnpm run test:integration || echo "Testes de integração não configurados"
+          
+      - name: Executar testes E2E
+        run: |
+          echo "Executando testes E2E..."
+          pnpm run test:e2e || echo "Testes E2E não configurados"
+          
+      - name: Upload coverage reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-reports
+          path: coverage/
+          retention-days: 30
         

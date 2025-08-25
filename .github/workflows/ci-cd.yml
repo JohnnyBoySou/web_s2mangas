@@ -23,23 +23,28 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: 'pnpm'
+          
+      - name: Instalar pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: latest
           
       - name: Instalar dependências
-        run: npm ci
+        run: pnpm install --frozen-lockfile
         
       - name: Verificar formato do código
         run: |
           echo "Verificando formato do código..."
-          npx prettier --check "src/**/*.{js,jsx,ts,tsx,css,md,json}" || echo "Prettier não encontrado, pulando verificação de formato"
+          pnpm prettier --check "src/**/*.{js,jsx,ts,tsx,css,md,json}" || echo "Prettier não encontrado, pulando verificação de formato"
           
       - name: Verificar tipos TypeScript
         run: |
           echo "Verificando tipos TypeScript..."
-          npx tsc --noEmit || echo "TypeScript não configurado, pulando verificação de tipos"
+          pnpm tsc --noEmit || echo "TypeScript não configurado, pulando verificação de tipos"
           
       - name: Build do projeto
-        run: npm run build
+        run: pnpm run build
         
       - name: Upload artifacts do build
         uses: actions/upload-artifact@v4
@@ -66,13 +71,18 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: 'pnpm'
+          
+      - name: Instalar pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: latest
           
       - name: Instalar dependências
-        run: npm ci
+        run: pnpm install --frozen-lockfile
         
       - name: Build do projeto
-        run: npm run build
+        run: pnpm run build
         
       - name: Setup Pages
         uses: actions/configure-pages@v4
