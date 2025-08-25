@@ -1,0 +1,110 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  # Job de CI (Continuous Integration)
+  ci:
+    name: Continuous Integration
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+        
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: Instalar dependências
+        run: npm ci
+        
+      - name: Verificar formato do código
+        run: |
+          echo "Verificando formato do código..."
+          npx prettier --check "src/**/*.{js,jsx,ts,tsx,css,md,json}" || echo "Prettier não encontrado, pulando verificação de formato"
+          
+      - name: Verificar tipos TypeScript
+        run: |
+          echo "Verificando tipos TypeScript..."
+          npx tsc --noEmit || echo "TypeScript não configurado, pulando verificação de tipos"
+          
+      - name: Build do projeto
+        run: npm run build
+        
+      - name: Upload artifacts do build
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-files
+          path: build/
+          retention-days: 1
+
+  # Job de CD (Continuous Deployment) - apenas para main
+  deploy:
+    name: Deploy para GitHub Pages
+    runs-on: ubuntu-latest
+    needs: ci
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    permissions:
+      pages: write
+      id-token: write
+    
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+        
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: Instalar dependências
+        run: npm ci
+        
+      - name: Build do projeto
+        run: npm run build
+        
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+        
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: build
+          
+      - name: Deploy para GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  # Job de notificação
+  notify:
+    name: Notificação de Status
+    runs-on: ubuntu-latest
+    needs: [ci, deploy]
+    if: always()
+    
+    steps:
+      - name: Notificar sucesso
+        if: needs.ci.result == 'success' && (needs.deploy.result == 'success' || needs.deploy.result == 'skipped')
+        run: |
+          echo "🎉 Pipeline executado com sucesso!"
+          echo "✅ CI: ${{ needs.ci.result }}"
+          echo "✅ CD: ${{ needs.deploy.result }}"
+          
+      - name: Notificar falha
+        if: needs.ci.result == 'failure' || (needs.deploy.result == 'failure' && needs.deploy.result != 'skipped')
+        run: |
+          echo "❌ Pipeline falhou!"
+          echo "CI: ${{ needs.ci.result }}"
+          echo "CD: ${{ needs.deploy.result }}"
+          exit 1

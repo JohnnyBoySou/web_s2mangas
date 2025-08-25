@@ -54,6 +54,10 @@
       },
       "scripts": {
           "dev": "vite",
-          "build": "vite build"
+          "build": "vite build",
+          "preview": "vite preview",
+          "type-check": "tsc --noEmit",
+          "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+          "lint:fix": "eslint src --ext ts,tsx --fix"
       }
   }
